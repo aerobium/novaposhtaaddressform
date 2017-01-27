@@ -20,7 +20,7 @@
     // FixMe it must be cleared usually
     let warehousesForCurrentCity = []; // warehouses array for the current checked city
 
-    if (localStorage.getItem('citiesCatalog') != null) {
+    if (localStorage.getItem('citiesCatalog') !== null) {
         citiesCatalog = JSON.parse(localStorage.getItem('citiesCatalog'));
     } else {
         citiesCatalog = getCitiesCatalog();
@@ -30,7 +30,7 @@
             for (let property in citiesCatalog[i]) {
                 if (citiesCatalog[i].hasOwnProperty(property)) {
                     if (property != 'DescriptionRu' && property != 'Ref') {
-                        delete citiesCatalog[i][property]
+                        delete citiesCatalog[i][property];
                     }
                 }
                 citiesCatalog[i].value = citiesCatalog[i].DescriptionRu;
@@ -41,7 +41,7 @@
     }
 
 
-    if (localStorage.getItem('warehouses') != null) {
+    if (localStorage.getItem('warehouses') !== null) {
         warehouses = JSON.parse(localStorage.getItem('warehouses'));
     } else {
         warehouses = getWarehousesCatalog();
@@ -51,7 +51,7 @@
             for (let property in warehouses[i]) {
                 if (warehouses[i].hasOwnProperty(property)) {
                     if (property != 'DescriptionRu' && property != 'Ref' && property != 'CityRef') {
-                        delete warehouses[i][property]
+                        delete warehouses[i][property];
                     }
                 }
                 warehouses[i].value = warehouses[i].DescriptionRu;
@@ -109,7 +109,7 @@
     }
 
 
-    /*                                  Regexp matcher for autocomplete
+    /*                                  Find match for autocomplete
      ****************************************************************************************************
      */
 
@@ -131,7 +131,7 @@
                     value: citiesCatalog[i].DescriptionRu,
                     label: citiesCatalog[i].DescriptionRu,
                     ref: citiesCatalog[i].Ref
-                })
+                });
             }
         }
         return result;
@@ -157,7 +157,7 @@
                     value: warehouses[i].DescriptionRu,
                     label: warehouses[i].DescriptionRu,
                     ref: warehouses[i].Ref
-                })
+                });
             }
 
         }
@@ -169,7 +169,7 @@
         let size = warehouses.length;
         for (let i = 0; i < size; i++) {
             if (warehouses[i].CityRef == cityRef) {
-                result.push(warehouses[i])
+                result.push(warehouses[i]);
             }
         }
         return result;
@@ -183,7 +183,7 @@
     // autocomplete for city choose
     cityInput.autocomplete({
         source: function (request, response) {
-            response(getMatchedCities(citiesCatalog, request.term))
+            response(getMatchedCities(citiesCatalog, request.term));
         },
         select: function (event, ui) {
             $(this).val(ui.item.label);
@@ -199,7 +199,7 @@
     // autocomplete for choose warehouse
     warehouseInput.autocomplete({
         source: function (request, response) {
-            response(getMatchedWarehouse(warehousesForCurrentCity, request.term))
+            response(getMatchedWarehouse(warehousesForCurrentCity, request.term));
         },
         select: function (event, ui) {
             $(this).val(ui.item.label);
@@ -215,6 +215,6 @@
         warehousesForCurrentCity = getWarehousesForCurrentCity(warehouses, thisCityRef);
         warehouseInput.val(''); // clear warehouse input from old values
         warehouseRef.val(''); // clear warehouse input from old values
-    })
+    });
 
 })(window);
