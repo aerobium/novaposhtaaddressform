@@ -14,8 +14,8 @@
      ****************************************************************************************************
      */
 
-    let citiesCatalog;
-    let warehouses;
+    let citiesCatalog = {};
+    let warehouses = {};
 
     // FixMe it must be cleared usually
     let warehousesForCurrentCity = []; // warehouses array for the current checked city
@@ -25,8 +25,9 @@
     } else {
         citiesCatalog = getCitiesCatalog();
 
+        let l = citiesCatalog.length;
         // delete unnecessary properties form citiesCatalog (local storage has limit size)
-        for (let i = 0; i < citiesCatalog.length; i++) {
+        for (let i = 0; i < l; i++) {
             for (let property in citiesCatalog[i]) {
                 if (citiesCatalog[i].hasOwnProperty(property)) {
                     if (property != 'DescriptionRu' && property != 'Ref') {
@@ -46,8 +47,9 @@
     } else {
         warehouses = getWarehousesCatalog();
 
+        let l = warehouses.length;
         // delete unnecessary properties form warehouses (local storage has limit size)
-        for (let i = 0; i < warehouses.length; i++) {
+        for (let i = 0; i < l; i++) {
             for (let property in warehouses[i]) {
                 if (warehouses[i].hasOwnProperty(property)) {
                     if (property != 'DescriptionRu' && property != 'Ref' && property != 'CityRef') {
@@ -74,7 +76,8 @@
                 "apiKey": apiKey
             }),
             success: function (response) {
-                for (let i = 0; i < response.data.length; i++) {
+                let l = response.data.length;
+                for (let i = 0; i < l; i++) {
                     response.data[i].value = response.data[i].DescriptionRu;
                     response.data[i].label = response.data[i].DescriptionRu;
                 }
@@ -98,7 +101,8 @@
                 "apiKey": apiKey
             }),
             success: function (response) {
-                for (let i = 0; i < response.data.length; i++) {
+                let l = response.data.length;
+                for (let i = 0; i < l; i++) {
                     response.data[i].value = response.data[i].DescriptionRu;
                     response.data[i].label = response.data[i].DescriptionRu;
                 }
@@ -115,11 +119,13 @@
 
     function getMatchedCities(citiesCatalog, term) {
         let result = [];
-        let length = citiesCatalog.length;
 
+        // search should work even if start typing in lowercase
         term = term.charAt(0).toUpperCase() + term.slice(1);
 
-        for (let i = 0; i < length; i++) {
+        let l = citiesCatalog.length;
+
+        for (let i = 0; i < l; i++) {
             /*
              * Some 'DescriptionRu' contains region name in the '()', i.g. DescriptionRu : 'x (y)'
              * where x - city name, y - region name. We mast search only through the cities name. Because of this we
@@ -139,9 +145,8 @@
 
     function getMatchedWarehouse(warehouses, term) {
         let result = [];
-        let length = warehouses.length;
-        for (let i = 0; i < length; i++) {
-
+        let l = warehouses.length;
+        for (let i = 0; i < l; i++) {
 
             // ToDo need feedback from users to understand if they need this feature
             // /*
@@ -166,8 +171,8 @@
 
     function getWarehousesForCurrentCity(warehouses, cityRef) {
         let result = [];
-        let size = warehouses.length;
-        for (let i = 0; i < size; i++) {
+        let l = warehouses.length;
+        for (let i = 0; i < l; i++) {
             if (warehouses[i].CityRef == cityRef) {
                 result.push(warehouses[i]);
             }
