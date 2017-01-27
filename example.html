@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Poshta API: autocomplete for cities and warehouses</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+</head>
+<body>
+
+
+<div>
+    <label>
+        Город
+        <input type="text" name="city" placeholder="Город">
+    </label>
+</div>
+
+<div>
+    <label>
+        Отделение
+        <input type="text" name="warehouse" placeholder="Номер отделения">
+    </label>
+</div>
+
+<input type="text" name="cityRef" title="cityRef" hidden="hidden">
+<input type="text" name="warehouseRef" title="warehouseRef" hidden="hidden">
+
+
+<script
+        src="https://code.jquery.com/jquery-2.2.3.min.js"
+        integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+        crossorigin="anonymous"></script>
+
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="novaPoshtaApi.js"></script>
+
+<script>
+    npApi.init({
+        citiesApiUrl    :   'http://api.novaposhta.ua/v2.0/json/Address/getCities',
+        warehousesApiUrl:   'http://api.novaposhta.ua/v2.0/json/AddressGeneral/getWarehouses',
+        apiKey          :   'YOUR_NOVA_POSHTA_PRIVATE_KEY_FOR_API',
+        cityInput       :   $('input[name="city"]'),  // input with city,
+        warehouseInput  :   $('input[name="warehouse"]'), // input with warehouse,
+        cityRef         :   $('input[name="cityRef"]'), // input with city reference,
+        warehouseRef    :   $('input[name="warehouseRef"]') // input with warehouse reference,
+    });
+</script>
+
+</body>
+</html>
