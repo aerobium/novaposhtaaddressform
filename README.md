@@ -12,16 +12,17 @@ Once a day catalog will be updated and stored into your browser localstorage.
 
 ## Usage
 
-* Add reference to Jquery and Jquery-ui (js and css) to your html.
+* Add reference to Jquery and Jquery-ui (js and css) to your html page.
 * Add reference to novaPoshtaApi.js
-* Add some inputs to your html (see [example](https://github.com/aerobium/novaposhtaaddressform/blob/master/example.html))
+* Add some inputs to your html page (see [example](https://github.com/aerobium/novaposhtaaddressform/blob/master/example.html))
 * Put this code below
 
 ```js
     npApi.init({
         citiesApiUrl    :   'http://api.novaposhta.ua/v2.0/json/Address/getCities',
         warehousesApiUrl:   'http://api.novaposhta.ua/v2.0/json/AddressGeneral/getWarehouses',
-        apiKey          :   'YOUR_NOVA_POSHTA_PRIVATE_KEY_FOR_API',
+        apiKey          :   'YOUR_NOVA_POSHTA_API_PRIVATE_KEY',
+        language        :   'UA', // can be 'UA' or 'RU'
         cityInput       :   $('input[name="city"]'),  // input with city,
         warehouseInput  :   $('input[name="warehouse"]'), // input with warehouse,
         cityRef         :   $('input[name="cityRef"]'), // input with city reference,

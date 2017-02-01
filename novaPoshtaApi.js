@@ -11,11 +11,15 @@
                 }
             }
 
+            if (settings.language == 'UA') {
+                settings.language = 'Description';
+            } else if (settings.language == 'RU') {
+                settings.language = 'DescriptionRu';
+            }
             prepareLocalStorage();
             autocompleteInit();
         }
     };
-
 
     /*                                  Local storage prepare
      ****************************************************************************************************
@@ -33,18 +37,17 @@
             citiesCatalog = JSON.parse(localStorage.getItem('citiesCatalog'));
         } else {
             citiesCatalog = getCitiesCatalog();
-
             let l = citiesCatalog.length;
             // delete unnecessary properties form citiesCatalog (local storage has limit size)
             for (let i = 0; i < l; i++) {
                 for (let property in citiesCatalog[i]) {
                     if (citiesCatalog[i].hasOwnProperty(property)) {
-                        if (property != 'DescriptionRu' && property != 'Ref') {
+                        if (property != settings.language && property != 'Ref') {
                             delete citiesCatalog[i][property];
                         }
                     }
-                    citiesCatalog[i].value = citiesCatalog[i].DescriptionRu;
-                    citiesCatalog[i].label = citiesCatalog[i].DescriptionRu;
+                    citiesCatalog[i].value = citiesCatalog[i][settings.language];
+                    citiesCatalog[i].label = citiesCatalog[i][settings.language];
                 }
             }
             localStorage.setItem('citiesCatalog', JSON.stringify(citiesCatalog));
@@ -60,12 +63,12 @@
             for (let i = 0; i < l; i++) {
                 for (let property in warehouses[i]) {
                     if (warehouses[i].hasOwnProperty(property)) {
-                        if (property != 'DescriptionRu' && property != 'Ref' && property != 'CityRef') {
+                        if (property != settings.language && property != 'Ref' && property != 'CityRef') {
                             delete warehouses[i][property];
                         }
                     }
-                    warehouses[i].value = warehouses[i].DescriptionRu;
-                    warehouses[i].label = warehouses[i].DescriptionRu;
+                    warehouses[i].value = warehouses[i][settings.language];
+                    warehouses[i].label = warehouses[i][settings.language];
                 }
             }
             localStorage.setItem('warehouses', JSON.stringify(warehouses));
@@ -88,8 +91,8 @@
             success: function (response) {
                 let l = response.data.length;
                 for (let i = 0; i < l; i++) {
-                    response.data[i].value = response.data[i].DescriptionRu;
-                    response.data[i].label = response.data[i].DescriptionRu;
+                    response.data[i].value = response.data[i][settings.language];
+                    response.data[i].label = response.data[i][settings.language];
                 }
                 result = response.data;
             }
@@ -113,15 +116,14 @@
             success: function (response) {
                 let l = response.data.length;
                 for (let i = 0; i < l; i++) {
-                    response.data[i].value = response.data[i].DescriptionRu;
-                    response.data[i].label = response.data[i].DescriptionRu;
+                    response.data[i].value = response.data[i][settings.language];
+                    response.data[i].label = response.data[i][settings.language];
                 }
                 result = response.data;
             }
         });
         return result;
     }
-
 
     /*                                  Find match for autocomplete
      ****************************************************************************************************
@@ -136,15 +138,15 @@
         let l = citiesCatalog.length;
         for (let i = 0; i < l; i++) {
             /*
-             * Some 'DescriptionRu' contains region name in the '()', i.g. DescriptionRu : 'x (y)'
+             * Some 'Description' contains region name in the '()', i.g. Description : 'x (y)'
              * where x - city name, y - region name. We mast search only through the cities name. Because of this we
-             * take part of 'DescriptionRu' before first '(' entry.
+             * take part of 'Description' before first '(' entry.
              */
-            let fragment = citiesCatalog[i].DescriptionRu.split('(')[0];
+            let fragment = citiesCatalog[i][settings.language].split('(')[0];
             if (fragment.indexOf(term) !== -1) {
                 result.push({
-                    value: citiesCatalog[i].DescriptionRu,
-                    label: citiesCatalog[i].DescriptionRu,
+                    value: citiesCatalog[i][settings.language],
+                    label: citiesCatalog[i][settings.language],
                     ref: citiesCatalog[i].Ref
                 });
             }
@@ -152,20 +154,22 @@
         return result;
     }
 
+
     function getMatchedWarehouse(warehouses, term) {
         let result = [];
         let l = warehouses.length;
         for (let i = 0; i < l; i++) {
-            if (warehouses[i].DescriptionRu.indexOf(term) !== -1) {
+            if (warehouses[i][settings.language].indexOf(term) !== -1) {
                 result.push({
-                    value: warehouses[i].DescriptionRu,
-                    label: warehouses[i].DescriptionRu,
+                    value: warehouses[i][settings.language],
+                    label: warehouses[i][settings.language],
                     ref: warehouses[i].Ref
                 });
             }
         }
         return result;
     }
+
 
     function getWarehousesForCurrentCity(warehouses, cityRef) {
         let result = [];
@@ -198,6 +202,7 @@
                 return false;
             }
         });
+
 
         // autocomplete for choose warehouse
         settings.warehouseInput.autocomplete({
