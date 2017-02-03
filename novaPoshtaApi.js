@@ -27,54 +27,70 @@
 
     let citiesCatalog = {};
     let warehouses = {};
-
-    // FixMe it must be cleared usually
     let warehousesForCurrentCity = []; // warehouses array for the current checked city
 
 
     function prepareLocalStorage() {
-        if (localStorage.getItem('citiesCatalog') !== null) {
+        if (isLastUpdateToday() && localStorage.getItem('citiesCatalog') !== null && localStorage.getItem('warehouses') !== null) {
+            console.log('Use old catalogs');
             citiesCatalog = JSON.parse(localStorage.getItem('citiesCatalog'));
-        } else {
-            citiesCatalog = getCitiesCatalog();
-            let l = citiesCatalog.length;
-            // delete unnecessary properties form citiesCatalog (local storage has limit size)
-            for (let i = 0; i < l; i++) {
-                for (let property in citiesCatalog[i]) {
-                    if (citiesCatalog[i].hasOwnProperty(property)) {
-                        if (property != settings.language && property != 'Ref') {
-                            delete citiesCatalog[i][property];
-                        }
-                    }
-                    citiesCatalog[i].value = citiesCatalog[i][settings.language];
-                    citiesCatalog[i].label = citiesCatalog[i][settings.language];
-                }
-            }
-            localStorage.setItem('citiesCatalog', JSON.stringify(citiesCatalog));
-        }
-
-        if (localStorage.getItem('warehouses') !== null) {
             warehouses = JSON.parse(localStorage.getItem('warehouses'));
         } else {
-            warehouses = getWarehousesCatalog();
-
-            let l = warehouses.length;
-            // delete unnecessary properties form warehouses (local storage has limit size)
-            for (let i = 0; i < l; i++) {
-                for (let property in warehouses[i]) {
-                    if (warehouses[i].hasOwnProperty(property)) {
-                        if (property != settings.language && property != 'Ref' && property != 'CityRef') {
-                            delete warehouses[i][property];
-                        }
-                    }
-                    warehouses[i].value = warehouses[i][settings.language];
-                    warehouses[i].label = warehouses[i][settings.language];
-                }
-            }
-            localStorage.setItem('warehouses', JSON.stringify(warehouses));
+            console.log('Preparing new catalogs');
+            localStorage.setItem('catalogLastUpdate', new Date());
+            putCitiesCatalogToLocalStorage();
+            putWarehousesToLocalStorage();
         }
     }
 
+
+    /**
+     * Check if localStorage was last time updated today or not.
+     */
+    function isLastUpdateToday() {
+        if (localStorage.getItem('catalogLastUpdate') === null) {
+            return false;
+        } else if (new Date().getDate() !== new Date(localStorage.getItem('catalogLastUpdate')).getDate()) {
+            return false;
+        }
+        return true;
+    }
+
+    function putCitiesCatalogToLocalStorage() {
+        citiesCatalog = getCitiesCatalog();
+        let l = citiesCatalog.length;
+        // delete unnecessary properties form citiesCatalog to decrease its size
+        for (let i = 0; i < l; i++) {
+            for (let property in citiesCatalog[i]) {
+                if (citiesCatalog[i].hasOwnProperty(property)) {
+                    if (property != settings.language && property != 'Ref') {
+                        delete citiesCatalog[i][property];
+                    }
+                }
+                citiesCatalog[i].value = citiesCatalog[i][settings.language];
+                citiesCatalog[i].label = citiesCatalog[i][settings.language];
+            }
+        }
+        localStorage.setItem('citiesCatalog', JSON.stringify(citiesCatalog));
+    }
+
+    function putWarehousesToLocalStorage() {
+        warehouses = getWarehousesCatalog();
+        let l = warehouses.length;
+        // delete unnecessary properties form warehouses to decrease its size
+        for (let i = 0; i < l; i++) {
+            for (let property in warehouses[i]) {
+                if (warehouses[i].hasOwnProperty(property)) {
+                    if (property != settings.language && property != 'Ref' && property != 'CityRef') {
+                        delete warehouses[i][property];
+                    }
+                }
+                warehouses[i].value = warehouses[i][settings.language];
+                warehouses[i].label = warehouses[i][settings.language];
+            }
+        }
+        localStorage.setItem('warehouses', JSON.stringify(warehouses));
+    }
 
     function getCitiesCatalog() {
         let result = {};
