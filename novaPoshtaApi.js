@@ -1,23 +1,26 @@
-(function (window, undefined) {
+(function (window) {
     'use strict';
 
-    let settings = {};
+    function AutoCompleteUnit(options) {
+
+        for (let p in options) {
+            if (options.hasOwnProperty(p)) {
+                this[p] = options[p];
+            }
+        }
+
+        if (options.language == 'UA') {
+            this.language = 'Description';
+        } else if (options.language == 'RU') {
+            this.language = 'DescriptionRu';
+        }
+    }
 
     let npApi = {
-        init(options){
-            for (let p in options) {
-                if (options.hasOwnProperty(p)) {
-                    settings[p] = options[p];
-                }
-            }
-
-            if (settings.language == 'UA') {
-                settings.language = 'Description';
-            } else if (settings.language == 'RU') {
-                settings.language = 'DescriptionRu';
-            }
-            prepareLocalStorage();
-            autocompleteInit();
+        init(option){
+            let autoCompleteUnit = new AutoCompleteUnit(option);
+            prepareLocalStorage(autoCompleteUnit);
+            autocompleteInit(autoCompleteUnit);
         }
     };
 
@@ -27,10 +30,9 @@
 
     let citiesCatalog = {};
     let warehouses = {};
-    let warehousesForCurrentCity = []; // warehouses array for the current checked city
 
 
-    function prepareLocalStorage() {
+    function prepareLocalStorage(autoCompleteUnit) {
         if (isLastUpdateToday() && localStorage.getItem('citiesCatalog') !== null && localStorage.getItem('warehouses') !== null) {
             console.log('Use old catalogs');
             citiesCatalog = JSON.parse(localStorage.getItem('citiesCatalog'));
@@ -38,8 +40,8 @@
         } else {
             console.log('Preparing new catalogs');
             localStorage.setItem('catalogLastUpdate', new Date());
-            putCitiesCatalogToLocalStorage();
-            putWarehousesToLocalStorage();
+            putCitiesCatalogToLocalStorage(autoCompleteUnit);
+            putWarehousesToLocalStorage(autoCompleteUnit);
         }
     }
 
@@ -56,59 +58,59 @@
         return true;
     }
 
-    function putCitiesCatalogToLocalStorage() {
-        citiesCatalog = getCitiesCatalog();
+    function putCitiesCatalogToLocalStorage(autoCompleteUnit) {
+        citiesCatalog = getCitiesCatalog(autoCompleteUnit);
         let l = citiesCatalog.length;
         // delete unnecessary properties form citiesCatalog to decrease its size
         for (let i = 0; i < l; i++) {
             for (let property in citiesCatalog[i]) {
                 if (citiesCatalog[i].hasOwnProperty(property)) {
-                    if (property != settings.language && property != 'Ref') {
+                    if (property != autoCompleteUnit.language && property != 'Ref') {
                         delete citiesCatalog[i][property];
                     }
                 }
-                citiesCatalog[i].value = citiesCatalog[i][settings.language];
-                citiesCatalog[i].label = citiesCatalog[i][settings.language];
+                citiesCatalog[i].value = citiesCatalog[i][autoCompleteUnit.language];
+                citiesCatalog[i].label = citiesCatalog[i][autoCompleteUnit.language];
             }
         }
         localStorage.setItem('citiesCatalog', JSON.stringify(citiesCatalog));
     }
 
-    function putWarehousesToLocalStorage() {
-        warehouses = getWarehousesCatalog();
+    function putWarehousesToLocalStorage(autoCompleteUnit) {
+        warehouses = getWarehousesCatalog(autoCompleteUnit);
         let l = warehouses.length;
         // delete unnecessary properties form warehouses to decrease its size
         for (let i = 0; i < l; i++) {
             for (let property in warehouses[i]) {
                 if (warehouses[i].hasOwnProperty(property)) {
-                    if (property != settings.language && property != 'Ref' && property != 'CityRef') {
+                    if (property != autoCompleteUnit.language && property != 'Ref' && property != 'CityRef') {
                         delete warehouses[i][property];
                     }
                 }
-                warehouses[i].value = warehouses[i][settings.language];
-                warehouses[i].label = warehouses[i][settings.language];
+                warehouses[i].value = warehouses[i][autoCompleteUnit.language];
+                warehouses[i].label = warehouses[i][autoCompleteUnit.language];
             }
         }
         localStorage.setItem('warehouses', JSON.stringify(warehouses));
     }
 
-    function getCitiesCatalog() {
+    function getCitiesCatalog(autoCompleteUnit) {
         let result = {};
         $.ajax({
             type: "POST",
             async: false,
             contentType: "application/json; charset=utf-8",
-            url: settings.citiesApiUrl,
+            url: autoCompleteUnit.citiesApiUrl,
             data: JSON.stringify({
                 "modelName": "Address",
                 "calledMethod": "getCities",
-                "apiKey": settings.apiKey
+                "apiKey": autoCompleteUnit.apiKey
             }),
             success: function (response) {
                 let l = response.data.length;
                 for (let i = 0; i < l; i++) {
-                    response.data[i].value = response.data[i][settings.language];
-                    response.data[i].label = response.data[i][settings.language];
+                    response.data[i].value = response.data[i][autoCompleteUnit.language];
+                    response.data[i].label = response.data[i][autoCompleteUnit.language];
                 }
                 result = response.data;
             }
@@ -117,23 +119,23 @@
     }
 
 
-    function getWarehousesCatalog() {
+    function getWarehousesCatalog(autoCompleteUnit) {
         let result = {};
         $.ajax({
             type: "POST",
             async: false,
             contentType: "application/json; charset=utf-8",
-            url: settings.warehousesApiUrl,
+            url: autoCompleteUnit.warehousesApiUrl,
             data: JSON.stringify({
                 "modelName": "AddressGeneral",
                 "calledMethod": "getWarehouses",
-                "apiKey": settings.apiKey
+                "apiKey": autoCompleteUnit.apiKey
             }),
             success: function (response) {
                 let l = response.data.length;
                 for (let i = 0; i < l; i++) {
-                    response.data[i].value = response.data[i][settings.language];
-                    response.data[i].label = response.data[i][settings.language];
+                    response.data[i].value = response.data[i][autoCompleteUnit.language];
+                    response.data[i].label = response.data[i][autoCompleteUnit.language];
                 }
                 result = response.data;
             }
@@ -145,7 +147,7 @@
      ****************************************************************************************************
      */
 
-    function getMatchedCities(citiesCatalog, term) {
+    function getMatchedCities(citiesCatalog, term, autoCompleteUnit) {
         let result = [];
 
         // search should work even if start typing in lowercase
@@ -158,11 +160,11 @@
              * where x - city name, y - region name. We mast search only through the cities name. Because of this we
              * take part of 'Description' before first '(' entry.
              */
-            let fragment = citiesCatalog[i][settings.language].split('(')[0];
+            let fragment = citiesCatalog[i][autoCompleteUnit.language].split('(')[0];
             if (fragment.indexOf(term) !== -1) {
                 result.push({
-                    value: citiesCatalog[i][settings.language],
-                    label: citiesCatalog[i][settings.language],
+                    value: citiesCatalog[i][autoCompleteUnit.language],
+                    label: citiesCatalog[i][autoCompleteUnit.language],
                     ref: citiesCatalog[i].Ref
                 });
             }
@@ -171,14 +173,14 @@
     }
 
 
-    function getMatchedWarehouse(warehouses, term) {
+    function getMatchedWarehouse(warehouses, term, autoCompleteUnit) {
         let result = [];
         let l = warehouses.length;
         for (let i = 0; i < l; i++) {
-            if (warehouses[i][settings.language].indexOf(term) !== -1) {
+            if (warehouses[i][autoCompleteUnit.language].indexOf(term) !== -1) {
                 result.push({
-                    value: warehouses[i][settings.language],
-                    label: warehouses[i][settings.language],
+                    value: warehouses[i][autoCompleteUnit.language],
+                    label: warehouses[i][autoCompleteUnit.language],
                     ref: warehouses[i].Ref
                 });
             }
@@ -203,36 +205,35 @@
      ****************************************************************************************************
      */
 
-    function autocompleteInit() {
+    function autocompleteInit(autoCompleteUnit) {
         // autocomplete for city choose
-        settings.cityInput.autocomplete({
+        autoCompleteUnit.cityInput.autocomplete({
             source: function (request, response) {
-                response(getMatchedCities(citiesCatalog, request.term));
+                response(getMatchedCities(citiesCatalog, request.term, autoCompleteUnit));
             },
             select: function (event, ui) {
                 $(this).val(ui.item.label);
-                settings.cityRef.val(ui.item.ref);
-                warehousesForCurrentCity = getWarehousesForCurrentCity(warehouses, ui.item.ref);
-                settings.warehouseInput.val('');
-                settings.warehouseRef.val('');
+                autoCompleteUnit.cityRef.val(ui.item.ref);
+                autoCompleteUnit.warehousesForCurrentCity = getWarehousesForCurrentCity(warehouses, ui.item.ref);
+                autoCompleteUnit.warehouseInput.val('');
+                autoCompleteUnit.warehouseRef.val('');
                 return false;
             }
         });
 
 
         // autocomplete for choose warehouse
-        settings.warehouseInput.autocomplete({
+        autoCompleteUnit.warehouseInput.autocomplete({
             source: function (request, response) {
-                response(getMatchedWarehouse(warehousesForCurrentCity, request.term));
+                response(getMatchedWarehouse(autoCompleteUnit.warehousesForCurrentCity, request.term, autoCompleteUnit));
             },
             select: function (event, ui) {
                 $(this).val(ui.item.label);
-                settings.warehouseRef.val(ui.item.ref);
+                autoCompleteUnit.warehouseRef.val(ui.item.ref);
                 return false;
             }
         });
     }
 
     window.npApi = npApi;
-
 })(window);
